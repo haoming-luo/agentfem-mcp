@@ -4,12 +4,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import tempfile
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+_CAPTURE_MEMORY_LIMIT = 1024 * 1024
+_PARSE_TAIL_LIMIT = 1024 * 1024
+_STATE_TAIL_LIMIT = 4000
 
 
 def _now() -> str:
@@ -44,25 +49,47 @@ def _write(path: Path, value: Mapping[str, Any]) -> None:
 
 
 def _payload(text: str) -> dict[str, Any] | None:
-    try:
-        value = json.loads(text.strip())
-    except (json.JSONDecodeError, TypeError):
-        return None
-    return value if isinstance(value, dict) else None
+    candidates = (text.strip(), *reversed(text.splitlines()))
+    for candidate in candidates:
+        if not candidate.strip():
+            continue
+        try:
+            value = json.loads(candidate)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(value, dict):
+            return value
+    return None
+
+
+def _tail(stream, limit: int) -> tuple[str, bool]:
+    stream.seek(0, os.SEEK_END)
+    size = stream.tell()
+    stream.seek(max(0, size - limit))
+    value = stream.read().decode("utf-8", errors="replace")
+    return value, size > limit
 
 
 def execute(job: Path, command: list[str]) -> int:
     state = _read(job)
     state.update(status="running", started_at=_now(), updated_at=_now())
     _write(job, state)
-    completed = subprocess.run(
-        command,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    payload = _payload(completed.stdout)
+    # Scientific runtimes can emit substantial compiler, PETSc, or MPI logs.
+    # Spooling prevents a long solve from retaining those streams in memory.
+    with (
+        tempfile.SpooledTemporaryFile(max_size=_CAPTURE_MEMORY_LIMIT) as stdout,
+        tempfile.SpooledTemporaryFile(max_size=_CAPTURE_MEMORY_LIMIT) as stderr,
+    ):
+        completed = subprocess.run(
+            command,
+            stdin=subprocess.DEVNULL,
+            stdout=stdout,
+            stderr=stderr,
+            check=False,
+        )
+        stdout_text, stdout_truncated = _tail(stdout, _PARSE_TAIL_LIMIT)
+        stderr_text, stderr_truncated = _tail(stderr, _PARSE_TAIL_LIMIT)
+    payload = _payload(stdout_text)
     state = _read(job)
     state.update(
         status="completed" if completed.returncode == 0 else "failed",
@@ -70,8 +97,10 @@ def execute(job: Path, command: list[str]) -> int:
         completed_at=_now(),
         updated_at=_now(),
         agentfem=payload,
-        stdout_tail=completed.stdout[-4000:] or None,
-        stderr_tail=completed.stderr[-4000:] or None,
+        stdout_tail=stdout_text[-_STATE_TAIL_LIMIT:] or None,
+        stderr_tail=stderr_text[-_STATE_TAIL_LIMIT:] or None,
+        stdout_truncated=stdout_truncated,
+        stderr_truncated=stderr_truncated,
     )
     _write(job, state)
     return int(completed.returncode)

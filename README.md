@@ -5,6 +5,7 @@
 [![CI](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/agentfem-mcp.svg)](https://pypi.org/project/agentfem-mcp/)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-6750A4)](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem)
+[![AgentFEM MCP server](https://glama.ai/mcp/servers/haoming-luo/agentfem-mcp/badges/score.svg)](https://glama.ai/mcp/servers/haoming-luo/agentfem-mcp)
 
 **One finite-element platform. Any compatible agent. Evidence intact.**
 

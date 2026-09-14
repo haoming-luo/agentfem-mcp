@@ -29,6 +29,8 @@ Accepted on 2026-09-15:
   stdio handshake returned exactly the seven documented tools;
 - the directory-health container pins the public package, runs as an
   unprivileged user, and is kept separate from the real local solver runtime.
+- Glama claimed the repository to its maintainer, started the server through
+  that container contract, and published its public directory score.
 
 The real-solver smoke test created and checked the official `static-solid`
 template, submitted an isolated run, observed its durable job identity, and
@@ -46,3 +48,4 @@ Public records:
 - [GitHub Actions publish evidence](https://github.com/haoming-luo/agentfem-mcp/actions/runs/34878639416)
 - [PyPI package and attestations](https://pypi.org/project/agentfem-mcp/0.1.0/)
 - [official MCP Registry listing](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem)
+- [Glama directory record](https://glama.ai/mcp/servers/haoming-luo/agentfem-mcp)
