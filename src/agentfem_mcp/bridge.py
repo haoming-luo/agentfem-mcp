@@ -354,24 +354,28 @@ class AgentFEMBridge:
             raise BridgeError(
                 "AFM-MCP-JOB-ROOT", "Job does not belong to this project."
             )
-        run_index = self._run(
-            ("runs", "--project", str(project), "--limit", "20", "--json")
-        )
-        runs = (
-            run_index.payload.get("runs", ())
-            if isinstance(run_index.payload, Mapping)
-            else ()
-        )
-        evidence = next(
-            (
-                item
-                for item in runs
-                if isinstance(item, Mapping) and item.get("run_id") == job_id
-            ),
-            None,
-        )
         result = dict(state)
-        result["agentfem_execution"] = evidence
+        result["agentfem_execution"] = None
+        # Polling a long job must remain a cheap file read. Importing the full
+        # numerical runtime on every heartbeat wastes memory and CPU; query the
+        # immutable AgentFEM run index only after a terminal state is reached.
+        if state.get("status") in {"completed", "failed"}:
+            run_index = self._run(
+                ("runs", "--project", str(project), "--limit", "20", "--json")
+            )
+            runs = (
+                run_index.payload.get("runs", ())
+                if isinstance(run_index.payload, Mapping)
+                else ()
+            )
+            result["agentfem_execution"] = next(
+                (
+                    item
+                    for item in runs
+                    if isinstance(item, Mapping) and item.get("run_id") == job_id
+                ),
+                None,
+            )
         return result
 
     def get_result_summary(
@@ -468,7 +472,7 @@ class AgentFEMBridge:
             ok=completed.returncode == 0,
             exit_code=int(completed.returncode),
             payload=payload,
-            stderr=completed.stderr.strip(),
+            stderr=completed.stderr.strip()[-4000:],
         )
 
     @staticmethod
@@ -491,7 +495,11 @@ class AgentFEMBridge:
             "schema": report.get("schema"),
             "schema_version": report.get("schema_version"),
             "healthy": report.get(
-                "healthy", report.get("status") not in {"failed", "unhealthy"}
+                "healthy",
+                report.get(
+                    "solver_ready",
+                    report.get("status") not in {"failed", "unhealthy"},
+                ),
             ),
             "python": report.get("python"),
             "machine": report.get("machine"),

@@ -72,6 +72,13 @@ def test_describe_is_compact_by_default(tmp_path: Path, fake_agentfem: Path) -> 
     ]
 
 
+def test_runtime_summary_honors_solver_ready() -> None:
+    summary = AgentFEMBridge._runtime_summary(
+        {"schema": "agentfem.runtime-report", "solver_ready": False}
+    )
+    assert summary["healthy"] is False
+
+
 def test_path_policy_and_non_empty_project_fail_closed(
     tmp_path: Path, fake_agentfem: Path
 ) -> None:
