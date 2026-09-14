@@ -58,7 +58,9 @@ def build_server() -> MCPServer:
         description="Inspect the installed AgentFEM runtime and approved roots. Use summary first; request full only when selecting an advanced capability.",
         annotations=READ_ONLY,
     )
-    def describe_system(detail: Literal["summary", "full"] = "summary") -> dict[str, Any]:
+    def describe_system(
+        detail: Literal["summary", "full"] = "summary",
+    ) -> dict[str, Any]:
         return _call(bridge().describe, detail=detail)
 
     @server.tool(
@@ -66,7 +68,9 @@ def build_server() -> MCPServer:
         description="Create a new project from one version-matched official AgentFEM template inside an approved root.",
         annotations=WRITE_ONCE,
     )
-    def create_project(path: str, template: str = "static-solid", name: str | None = None) -> dict[str, Any]:
+    def create_project(
+        path: str, template: str = "static-solid", name: str | None = None
+    ) -> dict[str, Any]:
         return _call(bridge().create_project, path, template=template, name=name)
 
     @server.tool(
@@ -90,7 +94,9 @@ def build_server() -> MCPServer:
         description="After preflight, start a finite-element run in a separate process and return a durable job identity immediately.",
         annotations=COMPUTE,
     )
-    def submit_run(path: str, name: str = "agent", mpi_ranks: int = 1) -> dict[str, Any]:
+    def submit_run(
+        path: str, name: str = "agent", mpi_ranks: int = 1
+    ) -> dict[str, Any]:
         return _call(bridge().submit_run, path, name=name, mpi_ranks=mpi_ranks)
 
     @server.tool(
@@ -106,8 +112,12 @@ def build_server() -> MCPServer:
         description="Read the structured scientific result for a completed job or the project's latest run, including its trust state.",
         annotations=READ_ONLY,
     )
-    def get_result_summary(path: str, job_id: str | None = None) -> dict[str, Any]:
-        return _call(bridge().get_result_summary, path, job_id=job_id)
+    def get_result_summary(
+        path: str,
+        job_id: str | None = None,
+        detail: Literal["summary", "full"] = "summary",
+    ) -> dict[str, Any]:
+        return _call(bridge().get_result_summary, path, job_id=job_id, detail=detail)
 
     return server
 

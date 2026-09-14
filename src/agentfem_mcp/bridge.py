@@ -9,6 +9,7 @@ import secrets
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -21,7 +22,9 @@ _RUN_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 class BridgeError(RuntimeError):
     """An addressable configuration or AgentFEM command failure."""
 
-    def __init__(self, code: str, message: str, *, details: Mapping[str, Any] | None = None):
+    def __init__(
+        self, code: str, message: str, *, details: Mapping[str, Any] | None = None
+    ):
         self.code = str(code)
         self.details = dict(details or {})
         super().__init__(message)
@@ -61,12 +64,23 @@ def _utc_now() -> str:
 
 def _atomic_json(path: Path, value: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(path)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            json.dump(value, stream, indent=2, sort_keys=True, ensure_ascii=False)
+            stream.write("\n")
+            temporary = Path(stream.name)
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -80,7 +94,9 @@ def _read_json(path: Path) -> dict[str, Any]:
             f"Job state is not valid JSON: {path}.",
         ) from exc
     if not isinstance(value, dict):
-        raise BridgeError("AFM-MCP-JOB-INVALID", f"Job state must be an object: {path}.")
+        raise BridgeError(
+            "AFM-MCP-JOB-INVALID", f"Job state must be an object: {path}."
+        )
     return value
 
 
@@ -97,7 +113,9 @@ def _parse_json_output(text: str) -> Mapping[str, Any]:
             details={"output_tail": selected[-2000:]},
         ) from exc
     if not isinstance(value, dict):
-        raise BridgeError("AFM-MCP-CLI-OUTPUT", "AgentFEM JSON output must be an object.")
+        raise BridgeError(
+            "AFM-MCP-CLI-OUTPUT", "AgentFEM JSON output must be an object."
+        )
     return value
 
 
@@ -121,7 +139,9 @@ class AgentFEMBridge:
         configured_roots = tuple(roots or self._environment_roots())
         if not configured_roots:
             configured_roots = (Path.cwd(),)
-        self.roots = tuple(Path(item).expanduser().resolve() for item in configured_roots)
+        self.roots = tuple(
+            Path(item).expanduser().resolve() for item in configured_roots
+        )
         self.command = tuple(command or self._discover_command())
         self.timeout_seconds = float(timeout_seconds)
         self.max_mpi_ranks = int(max_mpi_ranks)
@@ -176,7 +196,9 @@ class AgentFEMBridge:
             return (str(available[0]),)
         return (sys.executable, "-m", "agentfem.cli")
 
-    def describe(self, *, detail: Literal["summary", "full"] = "summary") -> dict[str, Any]:
+    def describe(
+        self, *, detail: Literal["summary", "full"] = "summary"
+    ) -> dict[str, Any]:
         """Describe one runtime without flooding an agent's working context."""
 
         doctor = self._require(self._run(("doctor", "--json")))
@@ -229,7 +251,9 @@ class AgentFEMBridge:
     def inspect_project(self, path: str) -> dict[str, Any]:
         project = self._path(path, must_exist=True)
         check = self.validate_project(str(project))
-        recent = self._run(("runs", "--project", str(project), "--limit", "5", "--json"))
+        recent = self._run(
+            ("runs", "--project", str(project), "--limit", "5", "--json")
+        )
         return {
             "schema": "agentfem.mcp-project",
             "schema_version": "0.1.0",
@@ -238,7 +262,9 @@ class AgentFEMBridge:
             "recent_runs": recent.as_dict(),
         }
 
-    def submit_run(self, path: str, *, name: str = "agent", mpi_ranks: int = 1) -> dict[str, Any]:
+    def submit_run(
+        self, path: str, *, name: str = "agent", mpi_ranks: int = 1
+    ) -> dict[str, Any]:
         project = self._path(path, must_exist=True)
         if not _RUN_NAME.fullmatch(str(name)):
             raise BridgeError(
@@ -258,7 +284,9 @@ class AgentFEMBridge:
                 "AgentFEM project validation failed; the run was not started.",
                 details=validation.as_dict(),
             )
-        job_id = f"{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(4)}"
+        job_id = (
+            f"{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(4)}"
+        )
         job_path = self._job_path(project, job_id)
         state = {
             "schema": "agentfem.mcp-job",
@@ -320,18 +348,36 @@ class AgentFEMBridge:
         project = self._path(path, must_exist=True)
         state = _read_json(self._job_path(project, job_id))
         if Path(str(state.get("project_root", ""))).resolve() != project:
-            raise BridgeError("AFM-MCP-JOB-ROOT", "Job does not belong to this project.")
-        run_index = self._run(("runs", "--project", str(project), "--limit", "20", "--json"))
-        runs = run_index.payload.get("runs", ()) if isinstance(run_index.payload, Mapping) else ()
+            raise BridgeError(
+                "AFM-MCP-JOB-ROOT", "Job does not belong to this project."
+            )
+        run_index = self._run(
+            ("runs", "--project", str(project), "--limit", "20", "--json")
+        )
+        runs = (
+            run_index.payload.get("runs", ())
+            if isinstance(run_index.payload, Mapping)
+            else ()
+        )
         evidence = next(
-            (item for item in runs if isinstance(item, Mapping) and item.get("run_id") == job_id),
+            (
+                item
+                for item in runs
+                if isinstance(item, Mapping) and item.get("run_id") == job_id
+            ),
             None,
         )
         result = dict(state)
         result["agentfem_execution"] = evidence
         return result
 
-    def get_result_summary(self, path: str, *, job_id: str | None = None) -> dict[str, Any]:
+    def get_result_summary(
+        self,
+        path: str,
+        *,
+        job_id: str | None = None,
+        detail: Literal["summary", "full"] = "summary",
+    ) -> dict[str, Any]:
         project = self._path(path, must_exist=True)
         if job_id:
             state = _read_json(self._job_path(project, job_id))
@@ -348,10 +394,17 @@ class AgentFEMBridge:
                     "AFM-MCP-RESULT-MISSING",
                     f"Job {job_id} did not publish a SimulationResult.",
                 )
-            outcome = self._run(("show", str(manifest), "--json"))
+            manifest_path = Path(str(manifest)).expanduser().resolve(strict=False)
+            if not (manifest_path == project or manifest_path.is_relative_to(project)):
+                raise BridgeError(
+                    "AFM-MCP-RESULT-PATH",
+                    "AgentFEM published a result path outside the approved project.",
+                )
+            outcome = self._run(("show", str(manifest_path), "--json"))
         else:
             outcome = self._run(("show", "latest", "--project", str(project), "--json"))
-        return self._require(outcome)
+        result = self._require(outcome)
+        return result if detail == "full" else self._result_summary(result)
 
     def _job_path(self, project: Path, job_id: str) -> Path:
         if not _RUN_NAME.fullmatch(str(job_id)):
@@ -363,14 +416,18 @@ class AgentFEMBridge:
         if not path.is_absolute():
             path = self.roots[0] / path
         selected = path.resolve(strict=False)
-        if not any(selected == root or selected.is_relative_to(root) for root in self.roots):
+        if not any(
+            selected == root or selected.is_relative_to(root) for root in self.roots
+        ):
             raise BridgeError(
                 "AFM-MCP-PATH-001",
                 f"Path is outside the approved AgentFEM roots: {selected}.",
                 details={"approved_roots": [str(item) for item in self.roots]},
             )
         if must_exist and not selected.is_dir():
-            raise BridgeError("AFM-MCP-PATH-404", f"Project directory does not exist: {selected}.")
+            raise BridgeError(
+                "AFM-MCP-PATH-404", f"Project directory does not exist: {selected}."
+            )
         return selected
 
     def _run(self, arguments: Sequence[str]) -> CommandOutcome:
@@ -430,7 +487,9 @@ class AgentFEMBridge:
         return {
             "schema": report.get("schema"),
             "schema_version": report.get("schema_version"),
-            "healthy": report.get("healthy", report.get("status") not in {"failed", "unhealthy"}),
+            "healthy": report.get(
+                "healthy", report.get("status") not in {"failed", "unhealthy"}
+            ),
             "python": report.get("python"),
             "machine": report.get("machine"),
             "packages": dict(packages) if isinstance(packages, Mapping) else packages,
@@ -444,7 +503,9 @@ class AgentFEMBridge:
                 if isinstance(item, Mapping)
             ],
             "platform": dict(platform) if isinstance(platform, Mapping) else platform,
-            "execution": dict(execution) if isinstance(execution, Mapping) else execution,
+            "execution": dict(execution)
+            if isinstance(execution, Mapping)
+            else execution,
         }
 
     @staticmethod
@@ -471,6 +532,67 @@ class AgentFEMBridge:
                 for item in providers
                 if isinstance(item, Mapping)
             ],
+        }
+
+    @staticmethod
+    def _result_summary(report: Mapping[str, Any]) -> dict[str, Any]:
+        seal = report.get("provenance_seal")
+        runtime = report.get("runtime")
+        scientific_inputs = report.get("scientific_inputs")
+        metadata = report.get("metadata")
+        run = metadata.get("run") if isinstance(metadata, Mapping) else None
+        verification = report.get("verification")
+        quantities = report.get("quantity_records") or ()
+        return {
+            "schema": report.get("schema"),
+            "schema_version": report.get("schema_version"),
+            "status": report.get("status"),
+            "trust_level": report.get("trust_level", report.get("trust")),
+            "name": report.get("name"),
+            "run_id": report.get("run_id")
+            or (run.get("run_id") if isinstance(run, Mapping) else None),
+            "quantities": [
+                {
+                    "name": item.get("name"),
+                    "value": item.get("value"),
+                    "unit": item.get("unit"),
+                    "kind": item.get("kind"),
+                }
+                for item in quantities
+                if isinstance(item, Mapping)
+            ],
+            "fields": list(report.get("fields") or ()),
+            "artifacts": dict(report.get("artifacts") or {}),
+            "verification": (
+                {
+                    key: verification.get(key)
+                    for key in ("status", "accepted", "profile", "policy", "summary")
+                    if key in verification
+                }
+                if isinstance(verification, Mapping)
+                else verification
+            ),
+            "scientific_inputs": (
+                {
+                    "complete": scientific_inputs.get("complete"),
+                    "fingerprint": scientific_inputs.get("fingerprint"),
+                    "missing_count": len(scientific_inputs.get("missing") or ()),
+                }
+                if isinstance(scientific_inputs, Mapping)
+                else None
+            ),
+            "provenance": (
+                {
+                    "completeness": seal.get("completeness"),
+                    "seal_id": seal.get("seal_id"),
+                    "producer_version": seal.get("producer_version"),
+                }
+                if isinstance(seal, Mapping)
+                else None
+            ),
+            "runtime_fingerprint": (
+                runtime.get("fingerprint") if isinstance(runtime, Mapping) else None
+            ),
         }
 
 

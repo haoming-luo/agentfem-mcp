@@ -8,7 +8,7 @@ import pytest
 
 from agentfem_mcp.bridge import AgentFEMBridge, BridgeError
 
-FAKE_AGENTFEM = r'''#!/usr/bin/env python3
+FAKE_AGENTFEM = r"""#!/usr/bin/env python3
 import json
 from pathlib import Path
 import sys
@@ -51,7 +51,7 @@ elif command == "show":
 else:
     print(json.dumps({"status": "failed", "error": {"code": "TEST-UNKNOWN"}}))
     raise SystemExit(2)
-'''
+"""
 
 
 @pytest.fixture
@@ -67,10 +67,14 @@ def test_describe_is_compact_by_default(tmp_path: Path, fake_agentfem: Path) -> 
     report = bridge.describe()
     assert report["capabilities"]["agentfem_version"] == "0.test"
     assert "limitations" not in report["capabilities"]["constitutive"][0]
-    assert bridge.describe(detail="full")["capabilities"]["constitutive"][0]["limitations"]
+    assert bridge.describe(detail="full")["capabilities"]["constitutive"][0][
+        "limitations"
+    ]
 
 
-def test_path_policy_and_non_empty_project_fail_closed(tmp_path: Path, fake_agentfem: Path) -> None:
+def test_path_policy_and_non_empty_project_fail_closed(
+    tmp_path: Path, fake_agentfem: Path
+) -> None:
     bridge = AgentFEMBridge(roots=[tmp_path], command=[str(fake_agentfem)])
     with pytest.raises(BridgeError, match="outside"):
         bridge.validate_project(str(tmp_path.parent))
@@ -81,7 +85,9 @@ def test_path_policy_and_non_empty_project_fail_closed(tmp_path: Path, fake_agen
         bridge.create_project(str(occupied))
 
 
-def test_create_submit_observe_and_read_result(tmp_path: Path, fake_agentfem: Path) -> None:
+def test_create_submit_observe_and_read_result(
+    tmp_path: Path, fake_agentfem: Path
+) -> None:
     bridge = AgentFEMBridge(roots=[tmp_path], command=[str(fake_agentfem)])
     project = tmp_path / "cantilever"
     created = bridge.create_project(str(project))
@@ -98,4 +104,9 @@ def test_create_submit_observe_and_read_result(tmp_path: Path, fake_agentfem: Pa
     assert status["status"] == "completed"
     assert status["worker_pid"] > 0
     result = bridge.get_result_summary(str(project), job_id=submitted["job_id"])
-    assert result["trust"] == "verified"
+    assert result["trust_level"] == "verified"
+    assert "trust" not in result
+    full = bridge.get_result_summary(
+        str(project), job_id=submitted["job_id"], detail="full"
+    )
+    assert full["trust"] == "verified"

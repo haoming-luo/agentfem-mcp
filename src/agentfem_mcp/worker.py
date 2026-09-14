@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import tempfile
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,12 +24,23 @@ def _read(path: Path) -> dict[str, Any]:
 
 
 def _write(path: Path, value: Mapping[str, Any]) -> None:
-    temporary = path.with_suffix(".json.tmp")
-    temporary.write_text(
-        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(path)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            json.dump(value, stream, indent=2, sort_keys=True, ensure_ascii=False)
+            stream.write("\n")
+            temporary = Path(stream.name)
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def _payload(text: str) -> dict[str, Any] | None:

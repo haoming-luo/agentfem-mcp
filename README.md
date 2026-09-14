@@ -17,7 +17,7 @@ It exposes seven tools—not hundreds of solver internals:
 | `inspect_project` | Read project and recent-run identity |
 | `submit_run` | Launch an isolated serial or MPI process |
 | `get_run_status` | Observe a durable background job |
-| `get_result_summary` | Read structured results and their trust state |
+| `get_result_summary` | Read a compact result and trust state; request full evidence only when needed |
 
 ## Bring it to life
 
