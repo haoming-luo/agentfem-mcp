@@ -57,6 +57,16 @@ Codex officially supports local stdio MCP servers. Confirm the connection with
 
 ### Claude Desktop and compatible clients
 
+Claude Code:
+
+```bash
+claude mcp add agentfem --scope user \
+  --env AGENTFEM_MCP_ROOTS=/absolute/path/to/AgentFEMProjects \
+  -- uvx --from agentfem-mcp agentfem-mcp
+```
+
+Claude Desktop configuration:
+
 ```json
 {
   "mcpServers": {
@@ -74,6 +84,31 @@ If a desktop app cannot see the activated conda environment, set
 `AGENTFEM_COMMAND` to the absolute `agentfem` executable. The official macOS
 runtime, AgentFEM WSL2 runtime, and common `agentfem-env`/`fenicsx-env` layouts
 are also detected automatically.
+
+### VS Code and other models
+
+VS Code can place the same local server in `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "agentfem": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "agentfem-mcp", "agentfem-mcp"],
+      "env": {
+        "AGENTFEM_MCP_ROOTS": "${workspaceFolder}"
+      }
+    }
+  }
+}
+```
+
+The server is model-neutral. A DeepSeek or other model can use it through any
+host that implements local MCP tools. ChatGPT connectors require a public HTTPS
+server; AgentFEM will add that route only with a real authenticated compute and
+artifact boundary, rather than silently uploading local models through this
+adapter.
 
 ### Local Codex plugin
 
