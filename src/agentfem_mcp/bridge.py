@@ -250,6 +250,7 @@ class AgentFEMBridge:
         project = self._path(path, must_exist=True)
         outcome = self._run(("check", "--project", str(project), "--json"))
         result = outcome.as_dict()
+        result["accepted"] = self._validation_passed(outcome)
         result["project_root"] = str(project)
         return result
 
@@ -283,7 +284,7 @@ class AgentFEMBridge:
                 f"mpi_ranks must be between 1 and {self.max_mpi_ranks}.",
             )
         validation = self._run(("check", "--project", str(project), "--json"))
-        if not validation.ok:
+        if not self._validation_passed(validation):
             raise BridgeError(
                 "AFM-MCP-PREFLIGHT",
                 "AgentFEM project validation failed; the run was not started.",
@@ -486,6 +487,17 @@ class AgentFEMBridge:
             "AgentFEM rejected the requested operation.",
             details=outcome.as_dict(),
         )
+
+    @staticmethod
+    def _validation_passed(outcome: CommandOutcome) -> bool:
+        """Require both process success and non-negative scientific semantics."""
+
+        if not outcome.ok:
+            return False
+        if outcome.payload.get("valid") is False:
+            return False
+        status = str(outcome.payload.get("status", "")).strip().lower()
+        return status not in {"error", "failed", "invalid", "rejected"}
 
     @staticmethod
     def _runtime_summary(report: Mapping[str, Any]) -> dict[str, Any]:

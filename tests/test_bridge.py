@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from agentfem_mcp.bridge import AgentFEMBridge, BridgeError
+from agentfem_mcp.bridge import AgentFEMBridge, BridgeError, CommandOutcome
 
 FAKE_AGENTFEM = r"""#!/usr/bin/env python3
 import json
@@ -79,12 +79,33 @@ def test_runtime_summary_honors_solver_ready() -> None:
     assert summary["healthy"] is False
 
 
+@pytest.mark.parametrize(
+    ("outcome", "expected"),
+    [
+        (CommandOutcome(True, 0, {"status": "passed", "valid": True}), True),
+        (CommandOutcome(True, 0, {"status": "passed", "valid": False}), False),
+        (CommandOutcome(True, 0, {"status": "failed"}), False),
+        (CommandOutcome(False, 2, {"status": "passed", "valid": True}), False),
+    ],
+)
+def test_preflight_requires_process_and_scientific_success(
+    outcome: CommandOutcome, expected: bool
+) -> None:
+    assert AgentFEMBridge._validation_passed(outcome) is expected
+
+
 def test_path_policy_and_non_empty_project_fail_closed(
     tmp_path: Path, fake_agentfem: Path
 ) -> None:
     bridge = AgentFEMBridge(roots=[tmp_path], command=[str(fake_agentfem)])
     with pytest.raises(BridgeError, match="outside"):
         bridge.validate_project(str(tmp_path.parent))
+    outside = tmp_path.parent / "outside-project"
+    outside.mkdir(exist_ok=True)
+    linked = tmp_path / "linked-project"
+    linked.symlink_to(outside, target_is_directory=True)
+    with pytest.raises(BridgeError, match="outside"):
+        bridge.validate_project(str(linked))
     occupied = tmp_path / "occupied"
     occupied.mkdir()
     (occupied / "keep.txt").write_text("user data", encoding="utf-8")

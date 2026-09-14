@@ -29,7 +29,7 @@ It exposes seven tools—not hundreds of solver internals:
 |---|---|
 | `describe_system` | Inspect the installed runtime and a compact capability map |
 | `create_project` | Start from a version-matched AgentFEM template |
-| `validate_project` | Fail closed before a solve |
+| `validate_project` | Report process success and scientific acceptance separately |
 | `inspect_project` | Read project and recent-run identity |
 | `submit_run` | Launch an isolated serial or MPI process |
 | `get_run_status` | Observe a durable background job |

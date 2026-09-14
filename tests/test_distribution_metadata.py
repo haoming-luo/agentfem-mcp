@@ -2,12 +2,25 @@ from __future__ import annotations
 
 import asyncio
 import json
+import tomllib
 from pathlib import Path
 
 from agentfem_mcp._version import __version__
 from agentfem_mcp.server import build_server
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_public_distribution_versions_are_one_contract() -> None:
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    registry = json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+
+    assert project["project"]["name"] == "agentfem-mcp"
+    assert project["project"]["version"] == __version__
+    assert registry["name"] == "io.github.haoming-luo/agentfem"
+    assert registry["version"] == __version__
+    assert registry["packages"][0]["identifier"] == "agentfem-mcp"
+    assert registry["packages"][0]["version"] == __version__
 
 
 def test_mcpb_manifest_tracks_public_server_contract() -> None:

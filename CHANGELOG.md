@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Desktop MCPB connection bundle and pinned, unprivileged discovery container.
+- Validation now separates process success from scientific acceptance, and a
+  run starts only when both pass.
+- Release-contract tests keep the Python package, Registry record, MCPB, and
+  discovery image versions aligned.
+
 ## 0.1.0 — 2026-09-15
 
 - First official AgentFEM MCP boundary.
