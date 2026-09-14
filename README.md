@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/agentfem-mcp.svg)](https://pypi.org/project/agentfem-mcp/)
 [![MCP](https://img.shields.io/badge/MCP-official%20companion-6750A4)](https://registry.modelcontextprotocol.io/)
 
-**One finite-element platform. Any compatible agent. One inspectable result.**
+**One finite-element platform. Any compatible agent. Evidence intact.**
 
 AgentFEM MCP gives Codex, Claude, and other MCP-compatible agents a small,
 stable tool surface for building and running inspectable finite-element
