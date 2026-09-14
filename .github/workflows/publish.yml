@@ -55,3 +55,32 @@ jobs:
         run: |
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish server.json
+
+  desktop-bundle:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: Validate and pack the desktop connection
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="${TAG#v}"
+          test "$(node -p "require('./packaging/mcpb/manifest.json').version")" = "$version"
+          npx --yes @anthropic-ai/mcpb validate packaging/mcpb
+          mkdir release-assets
+          npx --yes @anthropic-ai/mcpb pack \
+            packaging/mcpb "release-assets/AgentFEM-${version}.mcpb"
+          cd release-assets
+          sha256sum "AgentFEM-${version}.mcpb" \
+            > "AgentFEM-${version}.mcpb.sha256"
+      - name: Attach the connection bundle to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" release-assets/* --clobber

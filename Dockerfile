@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254
 
 ARG AGENTFEM_MCP_VERSION=0.1.0
 
@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.title="AgentFEM MCP" \
       org.opencontainers.image.source="https://github.com/haoming-luo/agentfem-mcp" \
       org.opencontainers.image.licenses="Apache-2.0"
 
-RUN python -m pip install --no-cache-dir \
+RUN python -m pip install --disable-pip-version-check --no-cache-dir \
       "agentfem-mcp==${AGENTFEM_MCP_VERSION}" \
     && useradd --create-home --uid 10001 agentfem
 

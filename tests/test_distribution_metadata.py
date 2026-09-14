@@ -29,6 +29,7 @@ def test_mcpb_manifest_tracks_public_server_contract() -> None:
 def test_discovery_container_is_pinned_and_unprivileged() -> None:
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
 
+    assert "python:3.12-slim-bookworm@sha256:" in dockerfile
     assert f"ARG AGENTFEM_MCP_VERSION={__version__}" in dockerfile
     assert '"agentfem-mcp==${AGENTFEM_MCP_VERSION}"' in dockerfile
     assert "USER agentfem" in dockerfile
