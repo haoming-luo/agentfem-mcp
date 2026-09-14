@@ -8,6 +8,7 @@ from typing import Any, Literal
 from mcp.server import MCPServer
 from mcp.types import ToolAnnotations
 
+from ._version import __version__
 from .bridge import AgentFEMBridge, BridgeError
 
 READ_ONLY = ToolAnnotations(
@@ -45,7 +46,7 @@ def _call(operation, *args, **kwargs) -> dict[str, Any]:
 def build_server() -> MCPServer:
     server = MCPServer(
         name="AgentFEM",
-        version="0.1.0",
+        version=__version__,
         instructions=(
             "Use AgentFEM as a deterministic finite-element platform. Validate before "
             "running, preserve the returned project and run identities, and never describe "

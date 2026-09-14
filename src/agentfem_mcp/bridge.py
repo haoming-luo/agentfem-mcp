@@ -16,6 +16,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
+from ._version import __version__
+
 _RUN_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 
 
@@ -209,7 +211,7 @@ class AgentFEMBridge:
         result: dict[str, Any] = {
             "schema": "agentfem.mcp-system",
             "schema_version": "0.1.0",
-            "server_version": "0.1.0",
+            "server_version": __version__,
             "roots": [str(item) for item in self.roots],
             "max_mpi_ranks": self.max_mpi_ranks,
             "runtime": self._runtime_summary(doctor),
