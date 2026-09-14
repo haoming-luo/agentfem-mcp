@@ -9,7 +9,7 @@ scientific result satisfy a verification contract?
 Accepted on 2026-09-15:
 
 - Python 3.11 and 3.12 unit-test matrix defined in CI;
-- lint, four unit/contract tests, wheel and source-distribution builds passed;
+- lint, five unit/contract tests, wheel and source-distribution builds passed;
 - MCP `server.json` passed the official 2025-12-11 Registry schema;
 - the Codex plugin manifest and AgentFEM workflow Skill passed their validators;
 - a separate stdio process exposed exactly the seven documented tools;
@@ -17,6 +17,13 @@ Accepted on 2026-09-15:
   DOLFINx 0.11.0, PETSc 3.25.2 and MPICH 5.0.1 on macOS arm64.
 - the same create, check, detached-run, status, and compact-result lifecycle
   also completed against the installed public AgentFEM 0.3.3 contracts.
+- the final artifacts were published from GitHub Actions to PyPI through OIDC,
+  with digital attestations and without a persistent package token;
+- `io.github.haoming-luo/agentfem` version 0.1.0 was accepted by the official
+  MCP Registry and exposed as its latest active record;
+- a clean environment installed `agentfem-mcp==0.1.0` from public PyPI,
+  exposed exactly the seven documented tools, and completed the same real
+  AgentFEM 0.3.3 lifecycle.
 
 The real-solver smoke test created and checked the official `static-solid`
 template, submitted an isolated run, observed its durable job identity, and
@@ -28,3 +35,9 @@ Its scientific trust level was `computed`, not `verified`, because the smoke
 model did not declare an independent acceptance criterion. The adapter
 preserved that distinction. This is a successful orchestration acceptance test,
 not an external validation benchmark.
+
+Public records:
+
+- [GitHub Actions publish evidence](https://github.com/haoming-luo/agentfem-mcp/actions/runs/34878639416)
+- [PyPI package and attestations](https://pypi.org/project/agentfem-mcp/0.1.0/)
+- [official MCP Registry listing](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem)

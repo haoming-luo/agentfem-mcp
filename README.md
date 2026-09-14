@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/agentfem-mcp.svg)](https://pypi.org/project/agentfem-mcp/)
-[![MCP](https://img.shields.io/badge/MCP-official%20companion-6750A4)](https://registry.modelcontextprotocol.io/)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-6750A4)](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem)
 
 **One finite-element platform. Any compatible agent. Evidence intact.**
 
@@ -12,6 +12,10 @@ AgentFEM MCP gives Codex, Claude, and other MCP-compatible agents a small,
 stable tool surface for building and running inspectable finite-element
 projects. AgentFEM remains the deterministic scientific engine; the agent
 interprets intent and explains evidence.
+
+[Install from PyPI](https://pypi.org/project/agentfem-mcp/) ·
+[Discover in the official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem) ·
+[Read the AgentFEM agent guide](https://haoming-luo.github.io/agentfem/agents/)
 
 It exposes seven tools—not hundreds of solver internals:
 
