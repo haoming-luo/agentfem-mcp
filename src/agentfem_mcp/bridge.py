@@ -173,25 +173,28 @@ class AgentFEMBridge:
         # Recognize AgentFEM's documented runtimes and common conda layouts so
         # the normal installer remains a zero-configuration experience.
         home = Path.home()
-        candidates = [
-            Path("/opt/conda/bin/agentfem"),
-            *(home / "Library").glob("AgentFEMRuntime-*/bin/agentfem"),
-        ]
-        for conda_root in (
+        candidates = [Path("/opt/conda/bin/agentfem")]
+        candidates.extend(
+            sorted(
+                (home / "Library").glob("AgentFEMRuntime-*/bin/agentfem"),
+                key=lambda item: item.parent.parent.name,
+                reverse=True,
+            )
+        )
+        conda_roots = (
             home / ".conda" / "envs",
             home / "miniforge3" / "envs",
             home / "mambaforge" / "envs",
             Path("/opt/homebrew/Caskroom/miniforge/base/envs"),
-        ):
+        )
+        # Prefer the documented AgentFEM environment across all conda roots;
+        # retain fenicsx-env only as the legacy developer fallback.
+        for environment in ("agentfem-env", "fenicsx-env"):
             candidates.extend(
                 conda_root / environment / "bin" / "agentfem"
-                for environment in ("agentfem-env", "fenicsx-env")
+                for conda_root in conda_roots
             )
-        available = sorted(
-            (item.resolve() for item in candidates if item.is_file()),
-            key=lambda item: str(item),
-            reverse=True,
-        )
+        available = tuple(item.resolve() for item in candidates if item.is_file())
         if available:
             return (str(available[0]),)
         return (sys.executable, "-m", "agentfem.cli")
