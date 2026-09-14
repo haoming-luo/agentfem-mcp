@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.haoming-luo/agentfem",
+  "title": "AgentFEM",
+  "description": "Build, run, inspect, and verify finite-element simulations with AgentFEM.",
+  "repository": {
+    "url": "https://github.com/haoming-luo/agentfem-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "agentfem-mcp",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Approved AgentFEM project roots, separated by the platform path separator.",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "AGENTFEM_MCP_ROOTS"
+        },
+        {
+          "description": "Absolute path to the AgentFEM executable when it is not on PATH.",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "AGENTFEM_COMMAND"
+        }
+      ]
+    }
+  ]
+}

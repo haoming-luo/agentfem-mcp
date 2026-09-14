@@ -1,0 +1,30 @@
+{
+  "name": "agentfem",
+  "version": "0.1.0",
+  "description": "Build, run, inspect, and verify finite-element simulations with AgentFEM.",
+  "author": {
+    "name": "Haoming Luo",
+    "url": "https://github.com/haoming-luo"
+  },
+  "homepage": "https://haoming-luo.github.io/agentfem/",
+  "repository": "https://github.com/haoming-luo/agentfem-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["finite-element", "scientific-computing", "mcp", "agentfem"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentFEM",
+    "shortDescription": "Verified finite-element workflows for AI agents.",
+    "longDescription": "Create, validate, run, inspect, and explain AgentFEM projects through a compact scientific tool contract.",
+    "developerName": "Haoming Luo",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write", "Compute"],
+    "websiteURL": "https://haoming-luo.github.io/agentfem/",
+    "defaultPrompt": [
+      "Build and verify my first AgentFEM model.",
+      "Inspect this AgentFEM project before running it.",
+      "Explain the trust evidence in my latest result."
+    ],
+    "brandColor": "#6750A4"
+  },
+  "mcpServers": "./.mcp.json"
+}

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If AgentFEM MCP supports your work, cite AgentFEM and this adapter."
+title: "AgentFEM MCP"
+type: software
+authors:
+  - family-names: Luo
+    given-names: Haoming
+version: 0.1.0
+date-released: 2026-09-15
+license: Apache-2.0
+repository-code: "https://github.com/haoming-luo/agentfem-mcp"
+url: "https://haoming-luo.github.io/agentfem/"
+preferred-citation:
+  type: report
+  title: "AgentFEM: An AI-Native Open-Source Platform for Finite-Element Computing"
+  authors:
+    - family-names: Luo
+      given-names: Haoming
+  year: 2026
+  url: "https://haoming-luo.github.io/agentfem/publications/agentfem-platform/"

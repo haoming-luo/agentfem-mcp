@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "agentfem": {
+      "command": "uvx",
+      "args": ["--from", "agentfem-mcp==0.1.0", "agentfem-mcp"]
+    }
+  }
+}

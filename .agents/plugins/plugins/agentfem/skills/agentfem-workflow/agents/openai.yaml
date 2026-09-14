@@ -1,0 +1,4 @@
+interface:
+  display_name: "AgentFEM Workflow"
+  short_description: "Build and verify finite-element simulations with AgentFEM."
+  default_prompt: "Use AgentFEM to build, run, verify, and explain this finite-element model."

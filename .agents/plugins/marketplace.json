@@ -1,0 +1,20 @@
+{
+  "name": "agentfem",
+  "interface": {
+    "displayName": "AgentFEM"
+  },
+  "plugins": [
+    {
+      "name": "agentfem",
+      "source": {
+        "source": "local",
+        "path": "./plugins/agentfem"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

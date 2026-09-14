@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "agentfem",
+  "version": "0.1.0",
+  "description": "Build and verify finite-element simulations through AgentFEM's scientific workflow.",
+  "author": {
+    "name": "Haoming Luo",
+    "url": "https://github.com/haoming-luo"
+  },
+  "homepage": "https://haoming-luo.github.io/agentfem/",
+  "repository": "https://github.com/haoming-luo/agentfem-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["finite-element", "scientific-computing", "mcp", "agentfem"]
+}
