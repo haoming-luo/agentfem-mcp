@@ -1,4 +1,10 @@
+<p align="center"><img src="https://raw.githubusercontent.com/haoming-luo/agentfem/main/logo/AgentFEM_logo.png" alt="AgentFEM" width="240"></p>
+
 # AgentFEM MCP
+
+[![CI](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/haoming-luo/agentfem-mcp/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/agentfem-mcp.svg)](https://pypi.org/project/agentfem-mcp/)
+[![MCP](https://img.shields.io/badge/MCP-official%20companion-6750A4)](https://registry.modelcontextprotocol.io/)
 
 **One finite-element platform. Any compatible agent. One inspectable result.**
 
@@ -35,6 +41,9 @@ Or install the lightweight adapter in the active environment:
 ```bash
 python -m pip install agentfem-mcp
 ```
+
+The 0.1.0 lifecycle is acceptance-tested with the public AgentFEM 0.3.3 CLI
+contracts and the current 0.3.7 development line.
 
 Give your agent a project root, not your whole home directory.
 

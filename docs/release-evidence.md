@@ -15,6 +15,8 @@ Accepted on 2026-09-15:
 - a separate stdio process exposed exactly the seven documented tools;
 - the full project lifecycle completed against AgentFEM 0.3.7.dev0,
   DOLFINx 0.11.0, PETSc 3.25.2 and MPICH 5.0.1 on macOS arm64.
+- the same create, check, detached-run, status, and compact-result lifecycle
+  also completed against the installed public AgentFEM 0.3.3 contracts.
 
 The real-solver smoke test created and checked the official `static-solid`
 template, submitted an isolated run, observed its durable job identity, and
