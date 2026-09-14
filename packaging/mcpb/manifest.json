@@ -1,0 +1,92 @@
+{
+  "manifest_version": "0.4",
+  "name": "agentfem",
+  "display_name": "AgentFEM",
+  "version": "0.1.0",
+  "description": "The official MCP interface for the AgentFEM finite-element platform.",
+  "long_description": "Connect a compatible desktop agent to an installed AgentFEM runtime through seven typed tools for creating, validating, running, inspecting, and verifying finite-element projects. AgentFEM remains the scientific engine and keeps models and results on the user's machine.",
+  "author": {
+    "name": "Haoming Luo",
+    "url": "https://github.com/haoming-luo"
+  },
+  "homepage": "https://haoming-luo.github.io/agentfem/",
+  "documentation": "https://haoming-luo.github.io/agentfem/agents/mcp/",
+  "support": "https://github.com/haoming-luo/agentfem-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haoming-luo/agentfem-mcp.git"
+  },
+  "server": {
+    "type": "uv",
+    "entry_point": "server/main.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "server/main.py"
+      ],
+      "env": {
+        "AGENTFEM_MCP_ROOTS": "${user_config.project_root}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "describe_system",
+      "description": "Inspect the installed AgentFEM runtime and its compact capability map."
+    },
+    {
+      "name": "create_project",
+      "description": "Create a project from a version-matched official AgentFEM template."
+    },
+    {
+      "name": "validate_project",
+      "description": "Run fail-closed structural and compatibility checks before solving."
+    },
+    {
+      "name": "inspect_project",
+      "description": "Read project validation and recent immutable run identities."
+    },
+    {
+      "name": "submit_run",
+      "description": "Start a finite-element run and return a durable job identity."
+    },
+    {
+      "name": "get_run_status",
+      "description": "Read progress and available execution evidence for a submitted run."
+    },
+    {
+      "name": "get_result_summary",
+      "description": "Read the structured scientific result and its explicit trust state."
+    }
+  ],
+  "keywords": [
+    "finite-element",
+    "scientific-computing",
+    "simulation",
+    "fenicsx",
+    "engineering"
+  ],
+  "license": "Apache-2.0",
+  "user_config": {
+    "project_root": {
+      "type": "directory",
+      "title": "AgentFEM project folder",
+      "description": "The only folder this connection may use for AgentFEM projects and results.",
+      "default": "${HOME}/Documents/AgentFEMProjects",
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin",
+      "linux"
+    ],
+    "runtimes": {
+      "python": ">=3.11.0 <3.14"
+    }
+  }
+}

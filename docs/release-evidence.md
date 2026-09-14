@@ -9,7 +9,7 @@ scientific result satisfy a verification contract?
 Accepted on 2026-09-15:
 
 - Python 3.11 and 3.12 unit-test matrix defined in CI;
-- lint, five unit/contract tests, wheel and source-distribution builds passed;
+- lint, seven unit/contract tests, wheel and source-distribution builds passed;
 - MCP `server.json` passed the official 2025-12-11 Registry schema;
 - the Codex plugin manifest and AgentFEM workflow Skill passed their validators;
 - a separate stdio process exposed exactly the seven documented tools;
@@ -24,6 +24,11 @@ Accepted on 2026-09-15:
 - a clean environment installed `agentfem-mcp==0.1.0` from public PyPI,
   exposed exactly the seven documented tools, and completed the same real
   AgentFEM 0.3.3 lifecycle.
+- the official MCPB 0.4 schema accepted the 1.6 kB desktop connection bundle;
+  a clean UV environment installed its pinned public dependency and a real
+  stdio handshake returned exactly the seven documented tools;
+- the directory-health container pins the public package, runs as an
+  unprivileged user, and is kept separate from the real local solver runtime.
 
 The real-solver smoke test created and checked the official `static-solid`
 template, submitted an isolated run, observed its durable job identity, and

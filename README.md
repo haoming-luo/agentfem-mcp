@@ -17,6 +17,12 @@ interprets intent and explains evidence.
 [Discover in the official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem) ·
 [Read the AgentFEM agent guide](https://haoming-luo.github.io/agentfem/agents/)
 
+For a supported desktop client on macOS or Linux, download the tiny
+`AgentFEM-0.1.0.mcpb` connection bundle from the
+[0.1.0 release](https://github.com/haoming-luo/agentfem-mcp/releases/tag/v0.1.0).
+It installs only the interface; the AgentFEM scientific runtime remains the
+single source of solver capabilities, upgrades, and results.
+
 It exposes seven tools—not hundreds of solver internals:
 
 | Tool | Purpose |
@@ -60,6 +66,11 @@ Codex officially supports local stdio MCP servers. Confirm the connection with
 > cantilever. Keep the project and result paths visible.
 
 ### Claude Desktop and compatible clients
+
+On macOS or Linux, open the release's `.mcpb` file in a supporting desktop
+client and choose the one project folder the connection may access. AgentFEM
+must already be installed. Windows support currently uses the explicit WSL2
+configuration from the AgentFEM guide rather than claiming a native bridge.
 
 Claude Code:
 
@@ -113,6 +124,13 @@ host that implements local MCP tools. ChatGPT connectors require a public HTTPS
 server; AgentFEM will add that route only with a real authenticated compute and
 artifact boundary, rather than silently uploading local models through this
 adapter.
+
+### Directory health image
+
+The repository's minimal, unprivileged `Dockerfile` exists for MCP directory
+startup and tool-introspection checks. It intentionally contains the public MCP
+adapter, not a second AgentFEM solver distribution. Real simulations should use
+the installed AgentFEM runtime and an explicit local project root.
 
 ### Local Codex plugin
 
