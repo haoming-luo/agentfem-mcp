@@ -19,6 +19,9 @@ def test_public_distribution_versions_are_one_contract() -> None:
     assert project["project"]["version"] == __version__
     assert registry["name"] == "io.github.haoming-luo/agentfem"
     assert registry["version"] == __version__
+    assert len(registry["description"]) <= 100
+    assert registry["websiteUrl"] == "https://haoming-luo.github.io/agentfem/"
+    assert registry["repository"]["id"] == "1370326403"
     assert registry["packages"][0]["identifier"] == "agentfem-mcp"
     assert registry["packages"][0]["version"] == __version__
 

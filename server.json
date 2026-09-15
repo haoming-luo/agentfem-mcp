@@ -2,8 +2,16 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.haoming-luo/agentfem",
   "title": "AgentFEM",
-  "description": "Build, run, inspect, and verify finite-element simulations with AgentFEM.",
+  "description": "AI-native finite-element simulation: build, run, inspect, and verify reproducible scientific models.",
+  "websiteUrl": "https://haoming-luo.github.io/agentfem/",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/haoming-luo/agentfem/main/logo/AgentFEM_logo.png",
+      "mimeType": "image/png"
+    }
+  ],
   "repository": {
+    "id": "1370326403",
     "url": "https://github.com/haoming-luo/agentfem-mcp",
     "source": "github"
   },

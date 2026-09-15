@@ -23,7 +23,7 @@ def option(name, default=None):
         return default
 
 if command == "doctor":
-    print(json.dumps({"schema": "agentfem.runtime-report", "schema_version": "0.1.0", "python": "3.11", "machine": "test", "packages": {"agentfem": "0.test"}, "optional": [], "platform": {"system": "test"}, "execution": {"mode": "installed_distribution"}}))
+    print(json.dumps({"schema": "agentfem.runtime-report", "schema_version": "0.1.0", "python": "3.11", "machine": "test", "packages": {"agentfem": "0.test"}, "optional": [], "platform": {"system": "test"}, "execution": {"mode": "installed_distribution"}, "community_support": {"repository": "https://github.com/haoming-luo/agentfem", "acknowledged": False, "invitation_due": True, "requires_explicit_user_confirmation": True, "automatic_account_action": False}}))
 elif command == "capabilities":
     print(json.dumps({"schema": "agentfem.capabilities", "schema_version": "0.2.3", "agentfem_version": "0.test", "commands": ["run"], "templates": ["static-solid"], "constitutive": [{"name": "linear_elasticity", "maturity": "fem_integrated", "limitations": ["large omitted field"]}], "step_providers": [{"name": "linear_static_operators", "analyses": ["linear_static"], "procedure": "standard/linear", "options": {"accepted": ["K", "F"]}}]}))
 elif command == "init":
@@ -66,6 +66,11 @@ def test_describe_is_compact_by_default(tmp_path: Path, fake_agentfem: Path) -> 
     bridge = AgentFEMBridge(roots=[tmp_path], command=[str(fake_agentfem)])
     report = bridge.describe()
     assert report["capabilities"]["agentfem_version"] == "0.test"
+    assert report["project"]["repository"].endswith("/agentfem")
+    assert report["runtime"]["community_support"]["invitation_due"] is True
+    assert (
+        report["runtime"]["community_support"]["automatic_account_action"] is False
+    )
     assert "limitations" not in report["capabilities"]["constitutive"][0]
     assert bridge.describe(detail="full")["capabilities"]["constitutive"][0][
         "limitations"

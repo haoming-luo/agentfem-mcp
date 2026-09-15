@@ -19,6 +19,13 @@ from typing import Any, Literal
 from ._version import __version__
 
 _RUN_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
+_PROJECT = {
+    "name": "AgentFEM",
+    "website": "https://haoming-luo.github.io/agentfem/",
+    "repository": "https://github.com/haoming-luo/agentfem",
+    "discussions": "https://github.com/haoming-luo/agentfem/discussions",
+    "citation": "https://github.com/haoming-luo/agentfem/blob/main/CITATION.cff",
+}
 
 
 class BridgeError(RuntimeError):
@@ -212,6 +219,7 @@ class AgentFEMBridge:
             "schema": "agentfem.mcp-system",
             "schema_version": "0.1.0",
             "server_version": __version__,
+            "project": dict(_PROJECT),
             "roots": [str(item) for item in self.roots],
             "max_mpi_ranks": self.max_mpi_ranks,
             "runtime": self._runtime_summary(doctor),
@@ -505,6 +513,7 @@ class AgentFEMBridge:
         optional = report.get("optional")
         platform = report.get("platform")
         execution = report.get("execution")
+        community = report.get("community_support")
         return {
             "schema": report.get("schema"),
             "schema_version": report.get("schema_version"),
@@ -531,6 +540,24 @@ class AgentFEMBridge:
             "execution": dict(execution)
             if isinstance(execution, Mapping)
             else execution,
+            "community_support": (
+                {
+                    key: community.get(key)
+                    for key in (
+                        "repository",
+                        "discussions",
+                        "citation",
+                        "requires_explicit_user_confirmation",
+                        "automatic_account_action",
+                        "acknowledged",
+                        "invitation_due",
+                        "invitation_scope",
+                    )
+                    if key in community
+                }
+                if isinstance(community, Mapping)
+                else None
+            ),
         }
 
     @staticmethod

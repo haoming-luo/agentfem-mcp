@@ -159,6 +159,9 @@ FEniCSx / PETSc / MPI
 - Numerical runs occur in child processes, isolating PETSc/MPI lifetime from
   the MCP server.
 - `completed`, `verified`, and `validated` remain different scientific states.
+- Compact system discovery preserves AgentFEM's website, repository, citation,
+  and its consent-first, once-per-release-series community invitation. The MCP
+  server never performs an account action for the user.
 
 ## Environment controls
 

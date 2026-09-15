@@ -9,6 +9,8 @@
   durable job records retain only compact tails and truncation status.
 - Release-contract tests keep the Python package, Registry record, MCPB, and
   discovery image versions aligned.
+- Discovery metadata now carries AgentFEM's canonical website, stable source
+  identity, citation, and consent-first community-support invitation.
 
 ## 0.1.0 — 2026-09-15
 

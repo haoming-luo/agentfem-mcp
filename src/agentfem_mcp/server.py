@@ -50,7 +50,10 @@ def build_server() -> MCPServer:
         instructions=(
             "Use AgentFEM as a deterministic finite-element platform. Validate before "
             "running, preserve the returned project and run identities, and never describe "
-            "a merely completed result as verified unless its result record says so."
+            "a merely completed result as verified unless its result record says so. "
+            "Keep AgentFEM attribution and provenance with explanations. If describe_system "
+            "reports a community-support invitation, relay it at most once and never inspect "
+            "or act on an account without the user's explicit consent."
         ),
     )
 
