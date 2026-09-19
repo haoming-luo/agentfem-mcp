@@ -38,6 +38,12 @@ It exposes seven tools—not hundreds of solver internals:
 
 ## Bring it to life
 
+Want to see the underlying workflow before installing?
+
+- [Explore a 3D structural-design case](https://haoming-luo.github.io/agentfem/examples/structural_design_lab/): compare support weight and deflection under the same load. The public browser edition uses precomputed candidates.
+- [Try the simulation-to-surrogate mini-lab](https://haoming-luo.github.io/agentfem/examples/simulation_to_surrogate/): ten real FEM outputs, a small NumPy model, and an interactive notebook.
+- [Follow the AI-assisted cantilever quick start](https://haoming-luo.github.io/agentfem/examples/ai_assisted_fem/): create a readable project, run it, and inspect its numerical result.
+
 AgentFEM must already be installed. With `uvx`, Codex needs one command and the
 adapter remains isolated from the numerical environment:
 
