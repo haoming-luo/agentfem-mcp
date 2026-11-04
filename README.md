@@ -19,6 +19,8 @@ interprets intent and explains evidence.
 [Discover in the official MCP Registry](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem) ·
 [Read the AgentFEM agent guide](https://haoming-luo.github.io/agentfem/agents/)
 
+**Already using an AI assistant in the terminal?** You can use AgentFEM directly through its CLI. [Choose between CLI, MCP, and skills →](docs/choosing-an-interface.md)
+
 For a supported desktop client on macOS or Linux, download the tiny
 `AgentFEM-0.1.0.mcpb` connection bundle from the
 [0.1.0 release](https://github.com/haoming-luo/agentfem-mcp/releases/tag/v0.1.0).
