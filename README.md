@@ -150,6 +150,27 @@ with the same MCP server; it does not create a second solver interface.
 
 ## The contract
 
+### Focused discovery (unreleased)
+
+Use `describe_system()` once when runtime readiness is unknown. On a runtime
+with scoped discovery, request `describe_system(topic="workflow")` or
+`describe_system(api="fields.displacement")` for a specific question; these make
+one read-only CLI call and do not run environment diagnostics or a simulation.
+Use `detail="full"` only when the full catalog is needed. A scoped result is
+not a complete list of supported physics. Concrete Step option compatibility
+remains the solver's responsibility.
+
+Check the connected tool schema before using these new arguments: they are not
+in 0.1.0. An older runtime that cannot answer a focused query gets an explicit
+error, not an automatic upgrade or silent full-catalog substitute.
+
+Tool failures set MCP `isError` and preserve structured error details. Reading a
+failed simulation's status is a successful inspection, not a request to retry.
+`submit_run` already performs preflight; use `validate_project` separately when
+editing, without repeating it as a mandatory submission ritual.
+
+### Same public execution path
+
 ```text
 AI agent
    │  seven typed MCP tools

@@ -49,3 +49,28 @@ Public records:
 - [PyPI package and attestations](https://pypi.org/project/agentfem-mcp/0.1.0/)
 - [official MCP Registry listing](https://registry.modelcontextprotocol.io/?q=io.github.haoming-luo%2Fagentfem)
 - [Glama directory record](https://glama.ai/mcp/servers/haoming-luo/agentfem-mcp)
+
+## Scoped discovery candidate — 2026-11-12 (unreleased)
+
+The candidate retains seven tools. Local Python 3.11 acceptance: 23 tests,
+Ruff, and isolated sdist-to-wheel build passed. Protocol tests exercise
+structured tool errors, unavailable runtime discovery, focused success and
+failed-run inspection without falsely flagging the inspection as failed.
+Bridge tests cover exact query arguments, no query-side filesystem writes,
+invalid query rejection and older-runtime compatibility boundaries.
+
+A real in-memory MCP client used the AgentFEM source candidate based on
+`a51afa12` with the FEniCSx environment. Workflow and callable queries passed;
+an unknown callable returned `isError` with the CLI error record. The approved
+query root remained empty. Creating the standard beam, submitting through the
+normal preflight, observing completion and reading the result passed. Maximum
+displacement was `4.274239717e-4 m`, relative force balance `1.905e-12`, and
+energy balance residual `2.552e-11`. Trust remained `computed`.
+
+This checks the source-candidate adapter/solver integration, not a newly
+published package, a Windows runtime or a scientific material benchmark.
+The published 0.1.0 desktop bundle is unchanged. Focused queries require the
+core scoped-discovery contract; an old runtime is not silently upgraded.
+
+Design references: [Agent Skills progressive disclosure](https://agentskills.io/specification)
+and [MCP tool results and errors](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
