@@ -68,9 +68,7 @@ def test_describe_is_compact_by_default(tmp_path: Path, fake_agentfem: Path) -> 
     assert report["capabilities"]["agentfem_version"] == "0.test"
     assert report["project"]["repository"].endswith("/agentfem")
     assert report["runtime"]["community_support"]["invitation_due"] is True
-    assert (
-        report["runtime"]["community_support"]["automatic_account_action"] is False
-    )
+    assert report["runtime"]["community_support"]["automatic_account_action"] is False
     assert "limitations" not in report["capabilities"]["constitutive"][0]
     assert bridge.describe(detail="full")["capabilities"]["constitutive"][0][
         "limitations"
@@ -82,6 +80,74 @@ def test_runtime_summary_honors_solver_ready() -> None:
         {"schema": "agentfem.runtime-report", "solver_ready": False}
     )
     assert summary["healthy"] is False
+
+
+@pytest.mark.parametrize(
+    "query,arguments,record",
+    [
+        (
+            {"topic": "materials"},
+            ("capabilities", "materials", "--json"),
+            {
+                "schema": "agentfem.capabilities",
+                "scope": {"topic": "materials", "complete": False},
+                "limitations": ["retained"],
+            },
+        ),
+        (
+            {"api": "fields.displacement"},
+            ("capabilities", "--api", "fields.displacement", "--json"),
+            {
+                "schema": "agentfem.api-callable",
+                "parameters": [{"name": "mesh"}],
+                "case_executed": False,
+            },
+        ),
+    ],
+)
+def test_focused_query_is_one_read_only_call(
+    tmp_path, monkeypatch, query, arguments, record
+):
+    bridge = AgentFEMBridge(roots=[tmp_path], command=["unused"])
+    calls = []
+
+    def run(args):
+        calls.append(args)
+        return CommandOutcome(True, 0, record)
+
+    monkeypatch.setattr(bridge, "_run", run)
+    assert bridge.describe(**query) == record
+    assert calls == [arguments]
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"topic": "--help"},
+        {"api": "os.system", "detail": "full"},
+        {"topic": "materials", "api": "fields.displacement"},
+        {"api": "x()"},
+    ],
+)
+def test_invalid_query_does_not_invoke_runtime(tmp_path, monkeypatch, query):
+    bridge = AgentFEMBridge(roots=[tmp_path], command=["unused"])
+    monkeypatch.setattr(
+        bridge, "_run", lambda args: pytest.fail("must not invoke runtime")
+    )
+    with pytest.raises(BridgeError):
+        bridge.describe(**query)
+
+
+def test_old_runtime_does_not_masquerade_as_scoped_query(tmp_path, monkeypatch):
+    bridge = AgentFEMBridge(roots=[tmp_path], command=["unused"])
+    monkeypatch.setattr(
+        bridge,
+        "_run",
+        lambda args: CommandOutcome(True, 0, {"schema": "agentfem.capabilities"}),
+    )
+    with pytest.raises(BridgeError, match="does not expose scoped"):
+        bridge.describe(topic="materials")
 
 
 @pytest.mark.parametrize(

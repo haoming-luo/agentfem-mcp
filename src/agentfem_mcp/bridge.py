@@ -209,12 +209,62 @@ class AgentFEMBridge:
         return (sys.executable, "-m", "agentfem.cli")
 
     def describe(
-        self, *, detail: Literal["summary", "full"] = "summary"
+        self,
+        *,
+        detail: Literal["summary", "full"] = "summary",
+        topic: str | None = None,
+        api: str | None = None,
     ) -> dict[str, Any]:
         """Describe one runtime without flooding an agent's working context."""
 
+        if detail not in ("summary", "full") or (topic is not None and api is not None):
+            raise BridgeError(
+                "AFM-MCP-QUERY", "Choose summary/full, one topic, or one API signature."
+            )
+        if topic is not None or api is not None:
+            if detail != "summary":
+                raise BridgeError(
+                    "AFM-MCP-QUERY", "Do not combine full with a topic or API query."
+                )
+            selected = topic if topic is not None else api
+            pattern = (
+                r"[A-Za-z][A-Za-z0-9_-]{0,127}"
+                if topic is not None
+                else r"(?:agentfem\.)?[A-Za-z]\w*\.[A-Za-z]\w*(?:\.[A-Za-z]\w*)?"
+            )
+            if not isinstance(selected, str) or re.fullmatch(pattern, selected) is None:
+                raise BridgeError(
+                    "AFM-MCP-QUERY",
+                    "Use a capability topic or a public MODULE.CALLABLE name.",
+                )
+            arguments = (
+                ("capabilities", topic, "--json")
+                if topic is not None
+                else ("capabilities", "--api", api, "--json")
+            )
+            record = self._require(self._run(arguments))
+            if api is not None and record.get("schema") != "agentfem.api-callable":
+                raise BridgeError(
+                    "AFM-MCP-QUERY-UNSUPPORTED",
+                    "Installed AgentFEM does not expose callable discovery.",
+                )
+            scope = record.get("scope")
+            if topic is not None and (
+                not isinstance(scope, Mapping) or scope.get("topic") != topic
+            ):
+                raise BridgeError(
+                    "AFM-MCP-QUERY-UNSUPPORTED",
+                    "Installed AgentFEM does not expose scoped capability records; use full explicitly or update the runtime.",
+                )
+            return record
+
         doctor = self._require(self._run(("doctor", "--json")))
-        capabilities = self._require(self._run(("capabilities", "--json")))
+        arguments = (
+            ("capabilities", "--json")
+            if detail == "full"
+            else ("capabilities", "workflow", "--json")
+        )
+        capabilities = self._require(self._run(arguments))
         result: dict[str, Any] = {
             "schema": "agentfem.mcp-system",
             "schema_version": "0.1.0",
@@ -570,6 +620,8 @@ class AgentFEMBridge:
             "agentfem_version": report.get("agentfem_version"),
             "commands": list(report.get("commands") or ()),
             "templates": list(report.get("templates") or ()),
+            "scope": {"complete": False, "kind": "discovery_summary"},
+            "model_methods": list((report.get("model_api") or {}).get("core", ())),
             "constitutive": [
                 {"name": item.get("name"), "maturity": item.get("maturity")}
                 for item in constitutive

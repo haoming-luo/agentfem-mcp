@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from typing import Any, Literal
 
 from mcp.server import MCPServer
-from mcp.types import ToolAnnotations
+from mcp.types import CallToolResult, TextContent, ToolAnnotations
 
 from ._version import __version__
 from .bridge import AgentFEMBridge, BridgeError
@@ -36,11 +37,16 @@ def bridge() -> AgentFEMBridge:
     return AgentFEMBridge()
 
 
-def _call(operation, *args, **kwargs) -> dict[str, Any]:
+def _call(operation, *args, **kwargs):
     try:
-        return operation(*args, **kwargs)
+        return getattr(bridge(), operation)(*args, **kwargs)
     except BridgeError as exc:
-        return exc.as_dict()
+        record = exc.as_dict()
+        return CallToolResult(
+            content=[TextContent(text=json.dumps(record, allow_nan=False))],
+            structuredContent=record,
+            isError=True,
+        )
 
 
 def build_server() -> MCPServer:
@@ -48,8 +54,9 @@ def build_server() -> MCPServer:
         name="AgentFEM",
         version=__version__,
         instructions=(
-            "Use AgentFEM as a deterministic finite-element platform. Validate before "
-            "running, preserve the returned project and run identities, and never describe "
+            "Use AgentFEM as a deterministic finite-element platform. submit_run performs "
+            "preflight; use validate_project for an explicit editing check. Preserve the "
+            "returned project and run identities, and never describe "
             "a merely completed result as verified unless its result record says so. "
             "Keep AgentFEM attribution and provenance with explanations. If describe_system "
             "reports a community-support invitation, relay it at most once and never inspect "
@@ -59,13 +66,15 @@ def build_server() -> MCPServer:
 
     @server.tool(
         title="Describe AgentFEM",
-        description="Inspect the installed AgentFEM runtime and approved roots. Use summary first; request full only when selecting an advanced capability.",
+        description="Inspect runtime/roots, one capability topic, or one installed API signature. Topic/API queries do not run doctor or a case. Use full only when needed.",
         annotations=READ_ONLY,
     )
     def describe_system(
         detail: Literal["summary", "full"] = "summary",
+        topic: str | None = None,
+        api: str | None = None,
     ) -> dict[str, Any]:
-        return _call(bridge().describe, detail=detail)
+        return _call("describe", detail=detail, topic=topic, api=api)
 
     @server.tool(
         title="Create AgentFEM project",
@@ -75,7 +84,7 @@ def build_server() -> MCPServer:
     def create_project(
         path: str, template: str = "static-solid", name: str | None = None
     ) -> dict[str, Any]:
-        return _call(bridge().create_project, path, template=template, name=name)
+        return _call("create_project", path, template=template, name=name)
 
     @server.tool(
         title="Validate AgentFEM project",
@@ -83,7 +92,7 @@ def build_server() -> MCPServer:
         annotations=READ_ONLY,
     )
     def validate_project(path: str) -> dict[str, Any]:
-        return _call(bridge().validate_project, path)
+        return _call("validate_project", path)
 
     @server.tool(
         title="Inspect AgentFEM project",
@@ -91,7 +100,7 @@ def build_server() -> MCPServer:
         annotations=READ_ONLY,
     )
     def inspect_project(path: str) -> dict[str, Any]:
-        return _call(bridge().inspect_project, path)
+        return _call("inspect_project", path)
 
     @server.tool(
         title="Submit AgentFEM run",
@@ -101,7 +110,7 @@ def build_server() -> MCPServer:
     def submit_run(
         path: str, name: str = "agent", mpi_ranks: int = 1
     ) -> dict[str, Any]:
-        return _call(bridge().submit_run, path, name=name, mpi_ranks=mpi_ranks)
+        return _call("submit_run", path, name=name, mpi_ranks=mpi_ranks)
 
     @server.tool(
         title="Get AgentFEM run status",
@@ -109,7 +118,7 @@ def build_server() -> MCPServer:
         annotations=READ_ONLY,
     )
     def get_run_status(path: str, job_id: str) -> dict[str, Any]:
-        return _call(bridge().get_run_status, path, job_id)
+        return _call("get_run_status", path, job_id)
 
     @server.tool(
         title="Get AgentFEM result summary",
@@ -121,7 +130,7 @@ def build_server() -> MCPServer:
         job_id: str | None = None,
         detail: Literal["summary", "full"] = "summary",
     ) -> dict[str, Any]:
-        return _call(bridge().get_result_summary, path, job_id=job_id, detail=detail)
+        return _call("get_result_summary", path, job_id=job_id, detail=detail)
 
     return server
 

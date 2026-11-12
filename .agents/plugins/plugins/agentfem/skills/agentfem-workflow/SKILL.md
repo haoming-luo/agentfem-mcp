@@ -5,14 +5,17 @@ description: Build, inspect, run, verify, or explain finite-element simulations 
 
 # AgentFEM workflow
 
-Use the AgentFEM MCP tools as one scientific lifecycle:
+Use only the part of the lifecycle the user requested:
 
-1. Call `describe_system` with the default summary before selecting a template
-   or advanced capability. Request `full` only when the summary cannot answer a
-   concrete compatibility question.
+1. Reuse known runtime context. If needed, call `describe_system` with the default
+   summary; query `topic="materials"` for one capability area or
+   `api="fields.displacement"` for an uncertain signature. These focused queries
+   do not run doctor or a case. Older runtimes may lack this support: consult
+   installed help or explicitly request `full`, not an automatic upgrade.
 2. Work only inside the approved project roots. Create a project from the
    nearest official template or inspect the user's existing project.
-3. Run `validate_project` before every submitted solve. Resolve addressable
+3. `submit_run` already performs preflight. Use `validate_project` for an explicit
+   editing check, not a duplicate before every submission. Resolve addressable
    errors without silently changing physical assumptions.
 4. Use `submit_run`, retain its `job_id`, and observe it with
    `get_run_status`. Do not start a duplicate merely because a long solve is
@@ -21,6 +24,10 @@ Use the AgentFEM MCP tools as one scientific lifecycle:
    run identity, quantities of interest, and evidence concisely.
 
 Preserve these distinctions:
+
+- Viewing results needs only result/status tools, not creation or another solve.
+- Tool failures retain structured error details and the MCP error flag. A reported
+  failed simulation status is scientific execution evidence, not permission to retry.
 
 - AgentFEM is the deterministic finite-element engine; the agent interprets,
   orchestrates, and explains.
